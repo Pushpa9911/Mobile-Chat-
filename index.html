@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Repair Chat</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e6f3ff;
+            color: #333;
+        }
+        header {
+            background-image: url('https://www.mobileserviceacademy.com/wp-content/uploads/2020/04/phone-repair.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #chatbox {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f9f9f9;
+        }
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            max-width: 80%;
+        }
+        .user-message {
+            background-color: #ffd1dc;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .bot-message {
+            background-color: #d1e8ff;
+        }
+        #user-input {
+            width: 70%;
+            padding: 0.5rem;
+            font-size: 1rem;
+        }
+        #send-btn {
+            width: 25%;
+            padding: 0.5rem;
+            font-size: 1rem;
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #send-btn:hover {
+            background-color: #ff1493;
+        }
+        #question-list {
+            margin-top: 2rem;
+        }
+        #question-list button {
+            display: block;
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            background-color: #e6f3ff;
+            border: 1px solid #b3d9ff;
+            cursor: pointer;
+            text-align: left;
+        }
+        #question-list button:hover {
+            background-color: #b3d9ff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mobile Repair Chat</h1>
+    </header>
+    <div class="container">
+        <div id="chatbox"></div>
+        <input type="text" id="user-input" placeholder="Type your question here...">
+        <button id="send-btn">Send</button>
+        <div id="question-list">
+            <h2>Common Questions</h2>
+            <!-- Question buttons will be added here dynamically -->
+        </div>
+    </div>
+    <script>
+        const chatbox = document.getElementById('chatbox');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const questionList = document.getElementById('question-list');
+
+        const questions = [
+            "My mobile won't switch on. What should I do?",
+            "My phone fell in water. How can I fix it?",
+            "My phone isn't charging properly. What could be the issue?",
+            "The screen on my phone is cracked. Can it be repaired?",
+            "My phone's battery drains too quickly. What can I do?",
+            "The speaker on my phone isn't working. How can I fix it?",
+            "My phone's camera is blurry. How can I improve it?",
+            "My phone is overheating. What should I do?",
+            "I forgot my phone's password. How can I unlock it?",
+            "My phone's touchscreen isn't responding. What can I do?"
+        ];
+
+        const answers = [
+            "Try holding the power button for 10-15 seconds. If that doesn't work, connect it to a charger for at least 30 minutes before trying again. If it still won't turn on, you may need to visit a repair shop.",
+            "First, turn off the phone immediately if it's still on. Remove the battery if possible. Put the phone in a bag of rice for 24-48 hours to absorb moisture. Do not attempt to turn it on during this time. After this, try turning it on. If it doesn't work, take it to a professional.",
+            "Check if the charging cable or adapter is damaged. Try a different cable or adapter. Also, check if the charging port on your phone is clean and free from debris. If the problem persists, it could be a battery issue and you should consult a professional.",
+            "A cracked screen usually requires professional repair. Depending on your phone model, it might be possible to replace just the screen. However, for many modern smartphones, the entire display assembly needs to be replaced. It's best to take it to a certified repair center.",
+            "Try closing background apps, reducing screen brightness, and turning off Wi-Fi and Bluetooth when not in use. If the problem persists, your battery might be old and need replacement. A professional can help you with this.",
+            "First, check if the speaker is blocked by dirt or debris. Clean it gently with a soft brush. If that doesn't work, check your phone's sound settings. If the problem persists, it could be a hardware issue requiring professional repair.",
+            "Clean the camera lens with a soft, lint-free cloth. Make sure there's no film or case obstructing the lens. If the problem persists, there might be an issue with the camera hardware or software, and you should consult a professional.",
+            "Close all apps and remove any case that might be trapping heat. Avoid using the phone while it's charging. If overheating persists, there might be a battery or other hardware issue, and you should have it checked by a professional.",
+            "If you have a Google account linked to your Android phone, you can use Google's Find My Device feature to unlock it. For iPhones, you can use iCloud to erase and reset your device. If these don't work, you may need to perform a factory reset, which will erase all data.",
+            "First, try restarting your phone. If that doesn't work, try cleaning the screen with a soft, slightly damp cloth. If the problem persists, there might be a hardware issue with the touchscreen, and you should have it checked by a professional."
+        ];
+
+        let messageCount = 0;
+
+        function addMessage(message, isUser = false) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(isUser ? 'user-message' : 'bot-message');
+            messageElement.textContent = message;
+            chatbox.appendChild(messageElement);
+            chatbox.scrollTop = chatbox.scrollHeight;
+            messageCount++;
+        }
+
+        function handleUserInput() {
+            const userMessage = userInput.value.trim();
+            if (userMessage) {
+                addMessage(userMessage, true);
+                userInput.value = '';
+                setTimeout(() => {
+                    const botResponse = "I'm sorry, but I can only answer the predefined questions. Please select one from the list below.";
+                    addMessage(botResponse);
+                }, 500);
+            }
+        }
+
+        function handleQuestionClick(index) {
+            if (messageCount >= 20) {
+                alert("You've reached the limit of 10 free chats. Please contact our support for more assistance.");
+                return;
+            }
+            addMessage(questions[index], true);
+            setTimeout(() => {
+                addMessage(answers[index]);
+            }, 500);
+        }
+
+        sendBtn.addEventListener('click', handleUserInput);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleUserInput();
+            }
+        });
+
+        questions.forEach((question, index) => {
+            const button = document.createElement('button');
+            button.textContent = question;
+            button.addEventListener('click', () => handleQuestionClick(index));
+            questionList.appendChild(button);
+        });
+
+        // Initial bot message
+        addMessage("Welcome to Mobile Repair Chat! How can I assist you today? Please select a question from the list below.");
+    </script>
+</body>
+</html>
